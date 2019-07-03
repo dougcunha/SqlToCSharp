@@ -4,6 +4,8 @@ using System.Text;
 
 namespace SqlToCSharp.Classes
 {
+    using System.Linq;
+
     /// <summary>
     /// Abstract base class for C# code generator.
     /// </summary>
@@ -106,7 +108,7 @@ namespace SqlToCSharp.Classes
         /// <returns>Modified name of member in Camel-case.</returns>
         private string GetCamelCase(string name)
         {
-            return (Char.ToLowerInvariant(name[0]) + name.Substring(1)).Replace("_", string.Empty).Replace(" ", string.Empty);
+            return name.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries).Select(s => char.ToLowerInvariant(s[0]) + s.Substring(1, s.Length - 1)).Aggregate(string.Empty, (s1, s2) => s1 + s2);
         }
 
         /// <summary>
@@ -116,7 +118,7 @@ namespace SqlToCSharp.Classes
         /// <returns>Modified name of member in Pascal-case.</returns>
         private string GetPascalCase(string name)
         {
-            return (Char.ToUpperInvariant(name[0]) + name.Substring(1)).Replace("_", string.Empty).Replace(" ", string.Empty);
+            return name.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries).Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1, s.Length - 1)).Aggregate(string.Empty, (s1, s2) => s1 + s2);
         }
     }
 }

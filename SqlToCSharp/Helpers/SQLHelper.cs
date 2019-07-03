@@ -380,6 +380,19 @@ namespace SqlToCSharp.Helpers
         {
             sqlTypeName = sqlTypeName.ToLower(System.Globalization.CultureInfo.InvariantCulture);
 
+            var myTypes = new Dictionary<string, SqlDbType>
+            {
+                ["data_hora"] = SqlDbType.DateTime,
+                ["nome_15"] = SqlDbType.VarChar,
+                ["moeda"] = SqlDbType.Money,
+                ["texto"] = SqlDbType.Text,
+                ["sim_nao"] = SqlDbType.VarChar,
+                ["inteiro"] = SqlDbType.Int,
+                ["dinheiro"] = SqlDbType.Money,
+                ["porcento"] = SqlDbType.Float,
+                ["bool"] = SqlDbType.Bit,
+            };
+
             if (Enum.TryParse(sqlTypeName, true, out SqlDbType sqlType))
             {
                 return sqlType;
@@ -398,6 +411,9 @@ namespace SqlToCSharp.Helpers
                         return SqlDbType.DateTime;
 
                     default:
+                        if (myTypes.TryGetValue(sqlTypeName, out var value))
+                            return value;
+
                         throw new InvalidCastException($"Unable to cast '{sqlTypeName}' to appropriate SqlDbType enum.");
                 }
             }

@@ -1,15 +1,16 @@
-﻿using SqlToCSharp.Extensions;
-using System;
-
-namespace SqlToCSharp.Classes
+﻿namespace SqlToCSharp.Classes
 {
+    using System;
+    using SqlToCSharp.Enums;
+    using SqlToCSharp.Extensions;
+
     /// <summary>
-    /// Class to create typed datatables.
+    ///     Class to create typed datatables.
     /// </summary>
     public class TypedDatatableCreator : CSharpCreatorBase
     {
         /// <summary>
-        /// Generates C# code as per specified settings and properties.
+        ///     Generates C# code as per specified settings and properties.
         /// </summary>
         /// <param name="settings">C# generator settings</param>
         /// <param name="properties">Array of ClrProperty type</param>
@@ -27,18 +28,46 @@ namespace SqlToCSharp.Classes
 
             AppendLine("using System;");
             AppendLine("using System.Data;");
+
+            if (settings.NullValueIgnoreHandling || settings.SnakeCaseNamingStrategy)
+                AppendLine("using Newtonsoft.Json");
+
+            if (settings.SnakeCaseNamingStrategy)
+                AppendLine("using Newtonsoft.Json.Serialization");
+
             AppendLine();
 
-            bool hasNamespace = !string.IsNullOrEmpty(settings.Namespace);
+            var hasNamespace = !string.IsNullOrEmpty(settings.Namespace);
+
             if (hasNamespace)
             {
                 AppendLine($"namespace {settings.Namespace}");
                 OpenCurlyBraces();
             }
 
-            var modifier = Enum.GetName(typeof(Enums.AccessModifiers), settings.AccessModifier).ToLower();
-            if (modifier.Length > 0)
-                modifier = modifier + " ";
+            var modifier = Enum.GetName(typeof(AccessModifiers), settings.AccessModifier)
+                              ?.ToLower();
+
+            if (!string.IsNullOrEmpty(modifier))
+                modifier += " ";
+
+            if (settings.SnakeCaseNamingStrategy || settings.NullValueIgnoreHandling)
+            {
+                var attributeValues = string.Empty;
+
+                if (settings.NullValueIgnoreHandling)
+                    attributeValues = "ItemNullValueHandling = NullValueHandling.Ignore";
+
+                if (settings.SnakeCaseNamingStrategy)
+                {
+                    if (settings.NullValueIgnoreHandling)
+                        attributeValues += ", NamingStrategyType = typeof(SnakeCaseNamingStrategy)";
+                    else
+                        attributeValues += "NamingStrategyType = typeof(SnakeCaseNamingStrategy)";
+                }
+
+                AppendLine($"[JsonObject({attributeValues})]");
+            }
 
             AppendLine($"{modifier}class {settings.ClassName} : DataTable");
 
@@ -48,78 +77,79 @@ namespace SqlToCSharp.Classes
             AppendLine($"{modifier} {settings.ClassName}()");
 
             OpenCurlyBraces();
-            this.AppendLine($"this.TableName = this.GetType().Name;");
+            AppendLine("this.TableName = this.GetType().Name;");
+
             foreach (var p in properties)
-            {
-                this.AppendLine($"this.Columns.Add(\"{p.Name}\", typeof({p.PropertyType.GetDisplayName()}));");
-            }
+                AppendLine($"this.Columns.Add(\"{p.Name}\", typeof({p.PropertyType.GetDisplayName()}));");
+
             CloseCurlyBraces();
 
             var rowClassName = $"{settings.ClassName}Row";
 
-            this.AppendLine();
+            AppendLine();
 
-            this.AppendLine($"protected override Type GetRowType()");
+            AppendLine("protected override Type GetRowType()");
             OpenCurlyBraces();
 
-            this.AppendLine($"return typeof({rowClassName});");
+            AppendLine($"return typeof({rowClassName});");
             CloseCurlyBraces();
 
-            this.AppendLine();
+            AppendLine();
 
-            this.AppendLine($"public {rowClassName} this[int rowIndex]");
+            AppendLine($"public {rowClassName} this[int rowIndex]");
             OpenCurlyBraces();
 
-            this.AppendLine($"get {{ return ({rowClassName})Rows[rowIndex]; }}");
+            AppendLine($"get {{ return ({rowClassName})Rows[rowIndex]; }}");
             CloseCurlyBraces();
 
-            this.AppendLine();
+            AppendLine();
 
-            this.AppendLine($"public void AddRow({rowClassName} row)");
+            AppendLine($"public void AddRow({rowClassName} row)");
             OpenCurlyBraces();
 
-            this.AppendLine($"Rows.Add(row);");
+            AppendLine("Rows.Add(row);");
             CloseCurlyBraces();
 
-            this.AppendLine();
+            AppendLine();
 
-            this.AppendLine($"public new {rowClassName} NewRow()");
+            AppendLine($"public new {rowClassName} NewRow()");
             OpenCurlyBraces();
 
-            this.AppendLine($"return ({rowClassName})base.NewRow();");
+            AppendLine($"return ({rowClassName})base.NewRow();");
             CloseCurlyBraces();
 
             //table class closes here
             CloseCurlyBraces();
 
-            this.AppendLine();
+            AppendLine();
 
             //Writing Row Class starts here
-            this.AppendLine($"{modifier} class {rowClassName} : DataRow");
+            AppendLine($"{modifier} class {rowClassName} : DataRow");
             OpenCurlyBraces();
 
-
             //Adding Constructor
-            this.AppendLine();
-            this.AppendLine($"public {rowClassName}(DataRowBuilder rowBuilder) : base(rowBuilder) {{ }}");
-            this.AppendLine();
+            AppendLine();
+            AppendLine($"public {rowClassName}(DataRowBuilder rowBuilder) : base(rowBuilder) {{ }}");
+            AppendLine();
 
             //Adding Property accessors
             foreach (var p in properties)
             {
-                this.AppendLine($"public {p.PropertyType.GetDisplayName()} {GetNamePerConvention(p.Name, settings.PropertiesNamingConvention, settings.PropertiesPrefix)} {{ get => ({p.PropertyType.GetDisplayName()})this[\"{p.Name}\"]; set => this[\"{p.Name}\"] = value;}}");
-                this.AppendLine();
+                AppendLine
+                (
+                    $"public {p.PropertyType.GetDisplayName()} {GetNamePerConvention(p.Name, settings.PropertiesNamingConvention, settings.PropertiesPrefix)} {{ get => ({p.PropertyType.GetDisplayName()})this[\"{p.Name}\"]; set => this[\"{p.Name}\"] = value;}}"
+                );
+
+                AppendLine();
             }
 
             //Row Class closes here
             CloseCurlyBraces();
 
             if (hasNamespace)
-            {
                 CloseCurlyBraces();
-            }
 
-            return classBuilder.ToString();
+            return ClassBuilder.ToString();
         }
     }
 }

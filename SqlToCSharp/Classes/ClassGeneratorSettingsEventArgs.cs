@@ -18,5 +18,7 @@ namespace SqlToCSharp.Classes
         public string PropertiesPrefix { get; set; }
         public string CustomLogicSetter { get; set; }
         public string CustomLogicGetter { get; set; }
+        public bool NullValueIgnoreHandling { get; set; }
+        public bool SnakeCaseNamingStrategy { get; set; }
     }
 }

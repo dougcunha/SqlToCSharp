@@ -1,121 +1,104 @@
-﻿using System;
-using System.Windows.Forms;
-using SqlToCSharp.Helpers;
-using SqlToCSharp.Classes;
-
-namespace SqlToCSharp.Forms
+﻿namespace SqlToCSharp.Forms
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+    using SqlToCSharp.Classes;
+    using SqlToCSharp.Helpers;
+
     /// <summary>
-    /// Represents Form which will establish connection to Sql server database connnection.
+    ///     Represents Form which will establish connection to Sql server database connnection.
     /// </summary>
-    public partial class SQLConnectionForm : Form
+    public sealed partial class SqlConnectionForm : Form
     {
         /// <summary>
-        /// Default constructor.
+        ///     Default constructor.
         /// </summary>
-        public SQLConnectionForm()
+        public SqlConnectionForm()
         {
             InitializeComponent();
         }
 
         /// <summary>
-        /// Property of ConnectionRequest type.
-        /// </summary>
-        public ConnectionRequest ConnReq { get; private set; }
-
-        /// <summary>
-        /// Represents whether connection was established.
+        ///     Represents whether connection was established.
         /// </summary>
         public bool ConnectionSuccess { get; private set; }
 
         /// <summary>
-        /// Form load event handler.
+        ///     Property of ConnectionRequest type.
+        /// </summary>
+        public ConnectionRequest ConnReq { get; private set; }
+
+        /// <summary>
+        ///     Click event handler of Cancel button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event argument</param>
-        private void SQLConnectionForm_Load(object sender, EventArgs e)
+        private void BtnCancel_Click(object sender, EventArgs e)
         {
-            ddlAuth.SelectedIndex = 0;
-            txtServer.Text = System.Environment.MachineName;
-            ddlDb.Focus();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         /// <summary>
-        /// SelectedIndexChanged event handler for Authorization dropdownlist.
+        ///     Click event handler of Connect button.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event argument</param>
-        private void ddlAuth_SelectedIndexChanged(object sender, EventArgs e)
+        /// <exception cref="Exception"></exception>
+        private void BtnConnect_Click(object sender, EventArgs e)
         {
-            lblUser.Enabled = txtUser.Enabled = lblPass.Enabled = txtPass.Enabled = (!(ddlAuth.SelectedIndex == 0));
-        }
-
-        /// <summary>
-        /// Click event handler of Cancel button.
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event argument</param>
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
-        }
-
-        /// <summary>
-        /// Click event handler of Connect button.
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event argument</param>
-        private void btnConnect_Click(object sender, EventArgs e)
-        {
-            ConnectionRequest req = null;
             try
             {
                 if (ddlDb.SelectedValue == null || ddlDb.SelectedValue.ToString() == string.Empty)
-                    throw new Exception("Invalid database");
+                    throw new InvalidOperationException("Invalid database");
 
-                if (this.ddlAuth.SelectedIndex == 0)//Win auth
-                {
-                    req = new ConnectionRequest(txtServer.Text.Trim(), ddlDb.SelectedValue.ToString());
-                }
-                else
-                {
-                    req = new ConnectionRequest(txtServer.Text.Trim(), txtUser.Text.Trim(), txtPass.Text.Trim());
-                }
+                var req = ddlAuth.SelectedIndex == 0
+                ? new ConnectionRequest(txtServer.Text.Trim(), ddlDb.SelectedValue.ToString())
+                : new ConnectionRequest(txtServer.Text.Trim(), txtUser.Text.Trim(), txtPass.Text.Trim());
+
                 if (!req.TryConnect())
-                {
-                    throw new Exception("Sql Connection failed.");
-                }
-                this.ConnectionSuccess = true;
-                this.ConnReq = req;
+                    throw new InvalidOperationException("Sql Connection failed.");
 
-                AppStatic.DBConnectionString = req.SqlConn.ConnectionString;
+                ConnectionSuccess = true;
+                ConnReq = req;
+
+                AppStatic.DbConnectionString = req.SqlConn.ConnectionString;
                 AppStatic.Database = req.SqlConn.Database;
                 AppStatic.Server = req.SqlConn.DataSource;
-                this.DialogResult = DialogResult.OK;
-                this.Close();
+                DialogResult = DialogResult.OK;
+                Close();
             }
             catch (Exception ex)
             {
-                this.ConnectionSuccess = false;
+                ConnectionSuccess = false;
                 ErrorViewerForm.ShowError(ex, this);
-                ///MessageHelper.ShowError(ex.Message, this);
-                this.DialogResult = DialogResult.Cancel;
+                DialogResult = DialogResult.Cancel;
             }
         }
 
         /// <summary>
-        /// Enter event handler of Database combobox.
+        ///     SelectedIndexChanged event handler for Authorization dropdownlist.
         /// </summary>
         /// <param name="sender">Sender</param>
         /// <param name="e">Event argument</param>
-        private void ddlDb_Enter(object sender, EventArgs e)
+        private void DdlAuth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            lblUser.Enabled = txtUser.Enabled = lblPass.Enabled = txtPass.Enabled = ddlAuth.SelectedIndex != 0;
+        }
+
+        /// <summary>
+        ///     Enter event handler of Database combobox.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event argument</param>
+        private void DdlDb_Enter(object sender, EventArgs e)
         {
             try
             {
-                ConnectionRequest serverConnReq = GetServerConnection();
-                var sqlHelp = new SQLHelper(serverConnReq.SqlConn.ConnectionString);
-                var databases = sqlHelp.GetDatabaseList();
+                var serverConnReq = GetServerConnection();
+                var sqlHelp = new SqlHelper(serverConnReq.SqlConn.ConnectionString);
+                List<string> databases = sqlHelp.GetDatabaseList();
 
                 ddlDb.DataSource = databases;
             }
@@ -126,29 +109,32 @@ namespace SqlToCSharp.Forms
         }
 
         /// <summary>
-        /// Creates database connection from UI controls and tries to connect.
+        ///     Creates database connection from UI controls and tries to connect.
         /// </summary>
+        /// <exception cref="Exception"></exception>
         /// <returns>Instance of ConnectionRequest type.</returns>
         private ConnectionRequest GetServerConnection()
         {
-            ConnectionRequest serverConnReq = null;
-
-            if (this.ddlAuth.SelectedIndex == 0)//Win auth
-            {
-                serverConnReq = new ConnectionRequest(txtServer.Text.Trim());
-            }
-
-            else
-            {
-                serverConnReq = new ConnectionRequest(txtServer.Text.Trim(), txtUser.Text.Trim(), txtPass.Text.Trim());
-            }
+            var serverConnReq = ddlAuth.SelectedIndex == 0
+            ? new ConnectionRequest(txtServer.Text.Trim())
+            : new ConnectionRequest(txtServer.Text.Trim(), txtUser.Text.Trim(), txtPass.Text.Trim());
 
             if (!serverConnReq.TryConnect())
-            {
-                throw new Exception("Sql Connection failed.");
-            }
+                throw new InvalidOperationException("Sql Connection failed.");
 
             return serverConnReq;
+        }
+
+        /// <summary>
+        ///     Form load event handler.
+        /// </summary>
+        /// <param name="sender">Sender</param>
+        /// <param name="e">Event argument</param>
+        private void SqlConnectionForm_Load(object sender, EventArgs e)
+        {
+            ddlAuth.SelectedIndex = 0;
+            txtServer.Text = Environment.MachineName;
+            ddlDb.Focus();
         }
     }
 }

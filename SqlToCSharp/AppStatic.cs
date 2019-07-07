@@ -2,24 +2,22 @@
 {
     public static class AppStatic
     {
-        public static string DBConnectionString = string.Empty;
         public static string Database = string.Empty;
+        public static string DbConnectionString = string.Empty;
         public static string Server = string.Empty;
     }
 
     public static class Constants
     {
-        public const string Tables = "Tables";
-        public const string Views = "Views";
-        public const string TableValuedFunctions = "Table Valued Functions";
-        public const string UserDefinedTableTypes = "User-Defined Table Types";
-        public const string StoredProcedures = "Stored Procedures";
+        public const string CONTAINS = "Contains";
+        public const string DOES_NOT_CONTAIN = "Does not Contain";
+        public const string EQUALS = "Equals";
 
-        public const string Contains = "Contains";
-        public new const string Equals = "Equals";
-        public const string DoesNotContain = "Does not Contain";
-
-        public const string FilteredText = " (filtered)";
-
+        public const string FILTERED_TEXT = " (filtered)";
+        public const string STORED_PROCEDURES = "Stored Procedures";
+        public const string TABLES = "Tables";
+        public const string TABLE_VALUED_FUNCTIONS = "Table Valued Functions";
+        public const string USER_DEFINED_TABLE_TYPES = "User-Defined Table Types";
+        public const string VIEWS = "Views";
     }
 }

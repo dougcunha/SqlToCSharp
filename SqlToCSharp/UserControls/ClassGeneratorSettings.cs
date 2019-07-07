@@ -1,30 +1,18 @@
-﻿using SqlToCSharp.Classes;
-using SqlToCSharp.Enums;
-using System;
-using System.Windows.Forms;
-using SqlToCSharp.Forms;
-
-namespace SqlToCSharp.UserControls
+﻿namespace SqlToCSharp.UserControls
 {
+    using System;
+    using System.Windows.Forms;
+    using SqlToCSharp.Classes;
+    using SqlToCSharp.Enums;
+    using SqlToCSharp.Forms;
+
     /// <summary>
-    /// User-control to represent the settings, which is required to generate C# class.
+    ///     User-control to represent the settings, which is required to generate C# class.
     /// </summary>
     public partial class ClassGeneratorSettings : UserControl
     {
         /// <summary>
-        /// The Event Handler delegate declaration.
-        /// </summary>
-        /// <param name="sender">sender of this event.</param>
-        /// <param name="e">Event argument of type ClassGeneratorSettingsEventArgs</param>
-        public delegate void ClassGeneratorSettingsEventHandler(ClassGeneratorSettings sender, ClassGeneratorSettingsEventArgs e);
-
-        /// <summary>
-        /// The Settings Changed event handler.
-        /// </summary>
-        public event ClassGeneratorSettingsEventHandler ClassGeneratorSettingsChangedEventHandler;
-
-        /// <summary>
-        /// Default Constructor to ClassGeneratorSettings
+        ///     Default Constructor to ClassGeneratorSettings
         /// </summary>
         public ClassGeneratorSettings()
         {
@@ -32,34 +20,23 @@ namespace SqlToCSharp.UserControls
         }
 
         /// <summary>
-        /// The Load event handler of control.
+        ///     The Event Handler delegate declaration.
         /// </summary>
-        /// <param name="sender">The object which caused this event.</param>
-        /// <param name="e">The object of EventArgs type.</param>
-        private void ClassSettings_Load(object sender, EventArgs e)
-        {
-            this.accessModifierControl.SelectedIndex = 0;
-            this.membersTypeControl.SelectedIndex = 0;
-            this.fieldsConventionControl.SelectedIndex = 0;
-            this.propsConventionControl.SelectedIndex = 0;
-        }
+        /// <param name="sender">sender of this event.</param>
+        /// <param name="e">Event argument of type ClassGeneratorSettingsEventArgs</param>
+        public delegate void ClassGeneratorSettingsEventHandler(ClassGeneratorSettings sender, ClassGeneratorSettingsEventArgs e);
 
         /// <summary>
-        /// Click event handler of Apply button.
+        ///     The Settings Changed event handler.
         /// </summary>
-        /// <param name="sender">The object which caused this event.</param>
-        /// <param name="e">The object of EventArgs type.</param>
-        private void applyButton_Click(object sender, EventArgs e)
-        {
-            ApplySettings();
-        }
+        public event ClassGeneratorSettingsEventHandler ClassGeneratorSettingsChangedEventHandler;
 
         /// <summary>
-        /// Applies the changes in settings by raising an SettingsChanged event. 
+        ///     Applies the changes in settings by raising an SettingsChanged event.
         /// </summary>
         public void ApplySettings()
         {
-            ClassGeneratorSettingsEventArgs settingEventArgs = new ClassGeneratorSettingsEventArgs()
+            var settingEventArgs = new ClassGeneratorSettingsEventArgs
             {
                 ClassName = classNameControl.Text.Trim(),
                 Namespace = namespaceControl.Text.Trim(),
@@ -70,14 +47,49 @@ namespace SqlToCSharp.UserControls
                 PropertiesNamingConvention = GetNamingConvention(propsConventionControl),
                 PropertiesPrefix = propsConventionControl.Text.Trim(),
                 CustomLogicSetter = prependSetterControl.Text.Trim(),
-                CustomLogicGetter = prependGetterControl.Text.Trim()
+                CustomLogicGetter = prependGetterControl.Text.Trim(),
+                NullValueIgnoreHandling = ChkNullValueJsonIgnore.Checked,
+                SnakeCaseNamingStrategy = ChkSnakeCaseNaming.Checked
             };
 
-            ClassGeneratorSettingsChangedEventHandler(this, settingEventArgs);
+            ClassGeneratorSettingsChangedEventHandler?.Invoke(this, settingEventArgs);
+        }
+
+        public void ResetSettingsToDefault()
+        {
+            classNameControl.Text = namespaceControl.Text = prependGetterControl.Text = prependSetterControl.Text = string.Empty;
+
+            accessModifierControl.SelectedIndex = membersTypeControl.SelectedIndex =
+            fieldsConventionControl.SelectedIndex = propsConventionControl.SelectedIndex = 0;
+            ChkNullValueJsonIgnore.Checked = false;
+            ChkSnakeCaseNaming.Checked = false;
         }
 
         /// <summary>
-        /// Get the AccessModifiers enum from UI control. Default is 'public'.
+        ///     Click event handler of Apply button.
+        /// </summary>
+        /// <param name="sender">The object which caused this event.</param>
+        /// <param name="e">The object of EventArgs type.</param>
+        private void ApplyButton_Click(object sender, EventArgs e)
+        {
+            ApplySettings();
+        }
+
+        /// <summary>
+        ///     The Load event handler of control.
+        /// </summary>
+        /// <param name="sender">The object which caused this event.</param>
+        /// <param name="e">The object of EventArgs type.</param>
+        private void ClassSettings_Load(object sender, EventArgs e)
+        {
+            accessModifierControl.SelectedIndex = 0;
+            membersTypeControl.SelectedIndex = 0;
+            fieldsConventionControl.SelectedIndex = 0;
+            propsConventionControl.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        ///     Get the AccessModifiers enum from UI control. Default is 'public'.
         /// </summary>
         /// <returns>AccessModifiers enum</returns>
         private AccessModifiers GetAccessModifier()
@@ -92,7 +104,7 @@ namespace SqlToCSharp.UserControls
         }
 
         /// <summary>
-        /// Get MemberTypes enum from UI control, default is 'AutoProperties'.
+        ///     Get MemberTypes enum from UI control, default is 'AutoProperties'.
         /// </summary>
         /// <returns>MemberTypes enum</returns>
         private MemberTypes GetMemberType()
@@ -107,7 +119,7 @@ namespace SqlToCSharp.UserControls
         }
 
         /// <summary>
-        /// Get NamingConventions enum from ComboBox UI contol, defaukt is 'Custom'.
+        ///     Get NamingConventions enum from ComboBox UI contol, defaukt is 'Custom'.
         /// </summary>
         /// <param name="comboBox">UI control of ComboBox type.</param>
         /// <returns>NamingConventions enum</returns>
@@ -121,7 +133,7 @@ namespace SqlToCSharp.UserControls
             }
         }
 
-        private void resetAction_Click(object sender, EventArgs e)
+        private void ResetAction_Click(object sender, EventArgs e)
         {
             try
             {
@@ -129,14 +141,8 @@ namespace SqlToCSharp.UserControls
             }
             catch (Exception ex)
             {
-                ErrorViewerForm.ShowError(ex, this.Parent);
+                ErrorViewerForm.ShowError(ex, Parent);
             }
-        }
-
-        public void ResetSettingsToDefault()
-        {
-            classNameControl.Text = namespaceControl.Text = prependGetterControl.Text = prependSetterControl.Text = string.Empty;
-            accessModifierControl.SelectedIndex = membersTypeControl.SelectedIndex = fieldsConventionControl.SelectedIndex = propsConventionControl.SelectedIndex = 0;
         }
     }
 }

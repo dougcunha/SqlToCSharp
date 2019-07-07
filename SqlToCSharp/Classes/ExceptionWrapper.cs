@@ -1,54 +1,61 @@
-﻿using System;
-using System.Xml.Linq;
-
-namespace SqlToCSharp.Classes
+﻿namespace SqlToCSharp.Classes
 {
+    using System;
+    using System.Xml.Linq;
+
     public class ExceptionWrapper
     {
+        private readonly string _stringFormat = "Message: {0}" +
+        Environment.NewLine +
+        "Source: {1}" +
+        Environment.NewLine +
+        "Help Link: {2}" +
+        Environment.NewLine +
+        "Stack Trace: {3}";
+
         public ExceptionWrapper(Exception ex)
         {
-            this.Message = ex.Message;
-            this.Helplink = ex.HelpLink;
-            this.StackTrace = ex.StackTrace;
-            this.Source = ex.Source;
+            Message = ex.Message;
+            Helplink = ex.HelpLink;
+            StackTrace = ex.StackTrace;
+            Source = ex.Source;
+
             if (ex.InnerException != null)
-            {
-                this.InnerException = new ExceptionWrapper(ex.InnerException);
-            }
+                InnerException = new ExceptionWrapper(ex.InnerException);
         }
-        public string Message { get; set; }
 
-        public string Source { get; set; }
+        public string Helplink { get; }
 
-        public string StackTrace { get; set; }
+        public ExceptionWrapper InnerException { get; }
+        public string Message { get; }
 
-        public string Helplink { get; set; }
+        public string Source { get; }
 
-        public ExceptionWrapper InnerException { get; set; }
+        public string StackTrace { get; }
 
-        private readonly string StringFormat = "Message: {0}" + Environment.NewLine + "Source: {1}" + Environment.NewLine + "Help Link: {2}" + Environment.NewLine + "Stack Trace: {3}";
         public override string ToString()
-        {
-            return String.Format(StringFormat, this.Message, this.Source, this.Helplink, this.StackTrace);
-        }
+            => string.Format(_stringFormat, Message, Source, Helplink, StackTrace);
+
         public string ToXmlString()
+            => ConvertToXml();
+
+        private string ConvertToXml()
         {
-            return ConvertToXml();
-        }
-        XElement GetXElement()
-        {
-            return new XElement("Exception",
-                        new XElement(nameof(Message), Message),
-                        new XElement(nameof(Source), Source),
-                        new XElement(nameof(Helplink), Helplink),
-                        new XElement(nameof(StackTrace), StackTrace),
-                        this.InnerException != null ? this.InnerException.GetXElement() : null);
-        }
-        string ConvertToXml()
-        {
-            XDocument doc = new XDocument(this.GetXElement());
-            string s = doc.ToString();
+            var doc = new XDocument(GetXElement());
+            var s = doc.ToString();
+
             return s;
         }
+
+        private XElement GetXElement()
+            => new XElement
+            (
+                "Exception",
+                new XElement(nameof(Message), Message),
+                new XElement(nameof(Source), Source),
+                new XElement(nameof(Helplink), Helplink),
+                new XElement(nameof(StackTrace), StackTrace),
+                InnerException?.GetXElement()
+            );
     }
 }

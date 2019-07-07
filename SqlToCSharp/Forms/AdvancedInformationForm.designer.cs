@@ -92,7 +92,7 @@
             this.tvError.Name = "tvError";
             this.tvError.Size = new System.Drawing.Size(166, 338);
             this.tvError.TabIndex = 0;
-            this.tvError.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvError_AfterSelect);
+            this.tvError.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.TvError_AfterSelect);
             // 
             // txtValue
             // 
@@ -116,7 +116,7 @@
             this.btnSaveLocally.TabIndex = 1;
             this.btnSaveLocally.Text = "Save Error in file";
             this.btnSaveLocally.UseVisualStyleBackColor = true;
-            this.btnSaveLocally.Click += new System.EventHandler(this.btnSaveLocally_Click);
+            this.btnSaveLocally.Click += new System.EventHandler(this.BtnSaveLocally_Click);
             // 
             // btnClose
             // 

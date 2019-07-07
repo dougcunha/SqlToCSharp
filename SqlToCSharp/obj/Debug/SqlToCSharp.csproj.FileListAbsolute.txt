@@ -46,7 +46,6 @@ D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.Forms.MainForm.resourc
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.Forms.SQLConnectionForm.resources
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.Properties.Resources.resources
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.UserControls.ClassGeneratorSettings.resources
-D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.DBTreeView.resources
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.csproj.GenerateResource.cache
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.csproj.CoreCompileInputs.cache
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.exe.manifest
@@ -54,3 +53,4 @@ D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.application
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.csproj.CopyComplete
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.exe
 D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.pdb
+D:\projetos\SqlToCSharp\SqlToCSharp\obj\Debug\SqlToCSharp.UserControls.DbTreeView.resources

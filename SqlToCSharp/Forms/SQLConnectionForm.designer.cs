@@ -2,7 +2,7 @@
 {
     using SqlToCSharp.Classes;
 
-    partial class SQLConnectionForm
+    sealed partial class SqlConnectionForm
     {
         /// <summary>
         /// Required designer variable.
@@ -70,7 +70,7 @@
             this.ddlAuth.Name = "ddlAuth";
             this.ddlAuth.Size = new System.Drawing.Size(209, 21);
             this.ddlAuth.TabIndex = 3;
-            this.ddlAuth.SelectedIndexChanged += new System.EventHandler(this.ddlAuth_SelectedIndexChanged);
+            this.ddlAuth.SelectedIndexChanged += new System.EventHandler(this.DdlAuth_SelectedIndexChanged);
             // 
             // txtUser
             // 
@@ -124,7 +124,7 @@
             this.btnConnect.TabIndex = 9;
             this.btnConnect.Text = "&Connect";
             this.btnConnect.UseVisualStyleBackColor = true;
-            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
+            this.btnConnect.Click += new System.EventHandler(this.BtnConnect_Click);
             // 
             // btnCancel
             // 
@@ -136,7 +136,7 @@
             this.btnCancel.TabIndex = 10;
             this.btnCancel.Text = "Ca&ncel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            this.btnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // label6
             // 
@@ -217,7 +217,7 @@
             this.ddlDb.Name = "ddlDb";
             this.ddlDb.Size = new System.Drawing.Size(209, 21);
             this.ddlDb.TabIndex = 14;
-            this.ddlDb.Enter += new System.EventHandler(this.ddlDb_Enter);
+            this.ddlDb.Enter += new System.EventHandler(this.DdlDb_Enter);
             // 
             // SQLConnectionForm
             // 
@@ -228,12 +228,12 @@
             this.ClientSize = new System.Drawing.Size(352, 274);
             this.ControlBox = false;
             this.Controls.Add(this.panel1);
-            this.Name = "SQLConnectionForm";
+            this.Name = "SqlConnectionForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Sql Server Database Connection";
-            this.Load += new System.EventHandler(this.SQLConnectionForm_Load);
+            this.Load += new System.EventHandler(this.SqlConnectionForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);

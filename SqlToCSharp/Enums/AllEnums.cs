@@ -1,9 +1,9 @@
 ﻿namespace SqlToCSharp.Enums
 {
     /// <summary>
-    /// Enum of Database object types.
+    ///     Enum of Database object types.
     /// </summary>
-    public enum DBObjectType
+    public enum DbObjectType
     {
         None = -1,
         Table = 0,

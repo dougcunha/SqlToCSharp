@@ -1,5 +1,7 @@
 ﻿namespace SqlToCSharp.Forms
 {
+    using SqlToCSharp.UserControls;
+
     partial class MainForm
     {
         /// <summary>
@@ -38,7 +40,7 @@
             this.pocoGenerateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.generateSimpleTypedDatatableToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dbTreeView = new SqlToCSharp.DBTreeView();
+            this.dbTreeView = new DbTreeView();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.cSharpCodeControl = new FastColoredTextBoxNS.FastColoredTextBox();
             this.classGeneratorSetting = new SqlToCSharp.UserControls.ClassGeneratorSettings();
@@ -91,7 +93,7 @@
             this.dbConnectionMenuItem.Name = "dbConnectionMenuItem";
             this.dbConnectionMenuItem.Size = new System.Drawing.Size(187, 22);
             this.dbConnectionMenuItem.Text = "&Database Connection";
-            this.dbConnectionMenuItem.Click += new System.EventHandler(this.dbConnectionStripMenuItem_Click);
+            this.dbConnectionMenuItem.Click += new System.EventHandler(this.DbConnectionStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -103,21 +105,21 @@
             this.saveToFileToolStripMenuItem.Name = "saveToFileToolStripMenuItem";
             this.saveToFileToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
             this.saveToFileToolStripMenuItem.Text = "&Save to file";
-            this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
+            this.saveToFileToolStripMenuItem.Click += new System.EventHandler(this.SaveToFileToolStripMenuItem_Click);
             // 
             // pocoGenerateMenuItem
             // 
             this.pocoGenerateMenuItem.Name = "pocoGenerateMenuItem";
             this.pocoGenerateMenuItem.Size = new System.Drawing.Size(114, 20);
             this.pocoGenerateMenuItem.Text = "Generate &C# Class";
-            this.pocoGenerateMenuItem.Click += new System.EventHandler(this.pocoGenerateMenuItem_Click);
+            this.pocoGenerateMenuItem.Click += new System.EventHandler(this.PocoGenerateMenuItem_Click);
             // 
             // generateSimpleTypedDatatableToolStripMenuItem
             // 
             this.generateSimpleTypedDatatableToolStripMenuItem.Name = "generateSimpleTypedDatatableToolStripMenuItem";
             this.generateSimpleTypedDatatableToolStripMenuItem.Size = new System.Drawing.Size(194, 20);
             this.generateSimpleTypedDatatableToolStripMenuItem.Text = "Generate Simple &Typed Datatable";
-            this.generateSimpleTypedDatatableToolStripMenuItem.Click += new System.EventHandler(this.generateSimpleTypedDatatableToolStripMenuItem_Click);
+            this.generateSimpleTypedDatatableToolStripMenuItem.Click += new System.EventHandler(this.GenerateSimpleTypedDatatableToolStripMenuItem_Click);
             // 
             // splitContainer1
             // 
@@ -144,9 +146,9 @@
             this.dbTreeView.Name = "dbTreeView";
             this.dbTreeView.Size = new System.Drawing.Size(162, 512);
             this.dbTreeView.TabIndex = 0;
-            this.dbTreeView.GenerateCSharpClass += new System.EventHandler(this.dbTreeView_GenerateCSharpClass);
-            this.dbTreeView.GenerateTypedDatatable += new System.EventHandler(this.dbTreeView_GenerateTypedDatatable);
-            this.dbTreeView.SelectedNodeChanged += new System.Windows.Forms.TreeViewEventHandler(this.dbTreeView_SelectedNodeChanged);
+            this.dbTreeView.GenerateCSharpClass += new System.EventHandler(this.DbTreeView_GenerateCSharpClass);
+            this.dbTreeView.GenerateTypedDatatable += new System.EventHandler(this.DbTreeView_GenerateTypedDatatable);
+            this.dbTreeView.SelectedNodeChanged += new System.Windows.Forms.TreeViewEventHandler(this.DbTreeView_SelectedNodeChanged);
             // 
             // splitContainer2
             // 
@@ -205,7 +207,7 @@
             this.cSharpCodeControl.Size = new System.Drawing.Size(456, 480);
             this.cSharpCodeControl.TabIndex = 1;
             this.cSharpCodeControl.Zoom = 100;
-            this.cSharpCodeControl.MouseClick += new System.Windows.Forms.MouseEventHandler(this.cSharpCodeControl_MouseClick);
+            this.cSharpCodeControl.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CSharpCodeControl_MouseClick);
             // 
             // classGeneratorSetting
             // 
@@ -214,7 +216,7 @@
             this.classGeneratorSetting.Name = "classGeneratorSetting";
             this.classGeneratorSetting.Size = new System.Drawing.Size(254, 512);
             this.classGeneratorSetting.TabIndex = 0;
-            this.classGeneratorSetting.ClassGeneratorSettingsChangedEventHandler += new SqlToCSharp.UserControls.ClassGeneratorSettings.ClassGeneratorSettingsEventHandler(this.creatorSettings_ClassSettingChangedEventHandler);
+            this.classGeneratorSetting.ClassGeneratorSettingsChangedEventHandler += new SqlToCSharp.UserControls.ClassGeneratorSettings.ClassGeneratorSettingsEventHandler(this.CreatorSettings_ClassSettingChangedEventHandler);
             // 
             // textBoxContextMenu
             // 
@@ -231,14 +233,14 @@
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
             this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.selectAllToolStripMenuItem.Text = "Select All";
-            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
+            this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.SelectAllToolStripMenuItem_Click);
             // 
             // copyToolStripMenuItem
             // 
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             this.copyToolStripMenuItem.Size = new System.Drawing.Size(131, 22);
             this.copyToolStripMenuItem.Text = "Copy";
-            this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
+            this.copyToolStripMenuItem.Click += new System.EventHandler(this.CopyToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -250,7 +252,7 @@
             this.saveToFileToolStripMenuItem1.Name = "saveToFileToolStripMenuItem1";
             this.saveToFileToolStripMenuItem1.Size = new System.Drawing.Size(131, 22);
             this.saveToFileToolStripMenuItem1.Text = "Save to file";
-            this.saveToFileToolStripMenuItem1.Click += new System.EventHandler(this.saveToFileToolStripMenuItem_Click);
+            this.saveToFileToolStripMenuItem1.Click += new System.EventHandler(this.SaveToFileToolStripMenuItem_Click);
             // 
             // tabControl
             // 
@@ -316,7 +318,7 @@
         private System.Windows.Forms.SplitContainer splitContainer2;
         private UserControls.ClassGeneratorSettings classGeneratorSetting;
         private System.Windows.Forms.ToolStripMenuItem generateSimpleTypedDatatableToolStripMenuItem;
-        private DBTreeView dbTreeView;
+        private DbTreeView dbTreeView;
         private FastColoredTextBoxNS.FastColoredTextBox cSharpCodeControl;
         private System.Windows.Forms.ContextMenuStrip textBoxContextMenu;
         private System.Windows.Forms.ToolStripMenuItem selectAllToolStripMenuItem;

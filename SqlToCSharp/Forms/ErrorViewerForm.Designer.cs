@@ -71,7 +71,7 @@
             this.moreDetails.TabIndex = 3;
             this.moreDetails.Text = "?";
             this.moreDetails.UseVisualStyleBackColor = true;
-            this.moreDetails.Click += new System.EventHandler(this.moreDetails_Click);
+            this.moreDetails.Click += new System.EventHandler(this.MoreDetails_Click);
             // 
             // panel1
             // 

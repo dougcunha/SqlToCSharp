@@ -1,95 +1,94 @@
-﻿using System.Data.SqlClient;
-using System;
-namespace SqlToCSharp.Classes
+﻿namespace SqlToCSharp.Classes
 {
+    using System;
+    using System.Data;
+    using System.Data.SqlClient;
+
     public class ConnectionRequest
     {
-        public string ServerName;
-        public bool WinAuth;
-        public string Username = null;
-        public string Password = null;
-
-        public string DBName = null;
-        public SqlConnection SqlConn { get; private set; }
+        private const string FORMAT_DB_NAME = "Initial Catalog = {0}";
+        private const string FORMAT_SQL = "Data Source={0}; User ID = {1}; Password={2}";
 
         private const string FORMAT_WIN = "Server= {0}; Integrated Security = SSPI;";
-        private const string FORMAT_SQL = "Data Source={0}; User ID = {1}; Password={2}";
-        private const string FORMAT_DBName = "Initial Catalog = {0}";
 
+        public readonly string DbName;
+        public readonly string Password;
+        public readonly string ServerName;
+        public readonly string Username;
+        public readonly bool WinAuth;
 
         public ConnectionRequest(string server)
         {
-            if (server == null || server.Length == 0)
-                throw new ArgumentException("Server cannot be null or empty string", "server");
-            this.SqlConn = null;
+            if (string.IsNullOrEmpty(server))
+                throw new ArgumentException(@"Server cannot be null or empty string", nameof(server));
+
+            SqlConn = null;
             ServerName = server;
             WinAuth = true;
         }
+
         public ConnectionRequest(string server, string dbName) : this(server)
-        {
-            DBName = dbName;
-        }
+            => DbName = dbName;
+
         public ConnectionRequest(string server, string user, string pass) : this(server)
         {
-            if (user == null || user.Length == 0)
-                throw new ArgumentException("Username cannot be null or empty string", "user");
+            if (string.IsNullOrEmpty(user))
+                throw new ArgumentException(@"Username cannot be null or empty string", nameof(user));
 
-            if (pass == null || pass.Length == 0)
-                throw new ArgumentException("Password cannot be null or empty string", "pass");
+            if (string.IsNullOrEmpty(pass))
+                throw new ArgumentException(@"Password cannot be null or empty string", nameof(pass));
 
             WinAuth = false;
             Username = user;
             Password = pass;
         }
+
         public ConnectionRequest(string server, string user, string pass, string dbName) : this(server, user, pass)
-        {
-            DBName = dbName;
-        }
+            => DbName = dbName;
+
+        public SqlConnection SqlConn { get; private set; }
+
         public bool TryConnect()
         {
-            string connString = null;
-            if (WinAuth)
-                connString = string.Format(FORMAT_WIN, ServerName);
-            else
-                connString = string.Format(FORMAT_SQL, ServerName, Username, Password);
+            var connString = WinAuth
+            ? string.Format(FORMAT_WIN, ServerName)
+            : string.Format(FORMAT_SQL, ServerName, Username, Password);
 
-            if (!string.IsNullOrEmpty(DBName))
-            {
-                connString = $"{connString}; {string.Format(FORMAT_DBName, DBName)}";
-            }
+            if (!string.IsNullOrEmpty(DbName))
+                connString = $"{connString}; {string.Format(FORMAT_DB_NAME, DbName)}";
 
-            if (connString == null || connString.Length == 0)
-                throw new ArgumentException("Unable to create sql connection string.", "Connection String");
+            if (string.IsNullOrEmpty(connString))
+                throw new InvalidOperationException(@"Unable to create sql connection string.");
 
             SqlConnection sqlConn = null;
+
             try
             {
                 sqlConn = new SqlConnection(connString);
                 sqlConn.Open();
-                this.SqlConn = sqlConn;
+                SqlConn = sqlConn;
+
                 return true;
             }
             catch (SqlException)
             {
-                this.SqlConn = null;
+                SqlConn = null;
             }
-            catch (Exception)
+            catch
             {
-                this.SqlConn = null;
+                SqlConn = null;
+
                 throw;
             }
             finally
             {
-                if (sqlConn != null && (sqlConn.State != System.Data.ConnectionState.Closed))
-                {
+                if (sqlConn != null && sqlConn.State != ConnectionState.Closed)
                     sqlConn.Close();
-                }
-                if (this.SqlConn == null)
-                {
-                    sqlConn.Dispose();
-                    sqlConn = null;
-                }
+
+                if (SqlConn == null)
+                    sqlConn?.Dispose();
             }
+
             return false;
         }
     }

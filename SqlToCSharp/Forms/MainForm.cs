@@ -1,73 +1,96 @@
-﻿using SqlToCSharp.Classes;
-using SqlToCSharp.Helpers;
-using SqlToCSharp.UserControls;
-using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-
-namespace SqlToCSharp.Forms
+﻿namespace SqlToCSharp.Forms
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Windows.Forms;
+    using SqlToCSharp.Classes;
+    using SqlToCSharp.Helpers;
+    using SqlToCSharp.UserControls;
+
     /// <summary>
-    /// The Main form which contains all the features of Sql to C# code generator.
+    ///     The Main form which contains all the features of Sql to C# code generator.
     /// </summary>
     public partial class MainForm : Form
     {
         /// <summary>
-        /// C# Code generator base class.
+        ///     C# Code generator base class.
         /// </summary>
-        CSharpCreatorBase creator = null;
+        private CSharpCreatorBase _creator;
 
         /// <summary>
-        /// Dictionary of Database objects types and Database objects.
+        ///     Dictionary of Database objects types and Database objects.
         /// </summary>
-        private Dictionary<string, List<string[]>> dbObjects = null;
+        private Dictionary<string, List<string[]>> _dbObjects;
 
         /// <summary>
-        /// Default Contructor.
+        ///     Settings object.
+        /// </summary>
+        private CSharpSettings _settings;
+
+        /// <summary>
+        ///     Default Contructor.
         /// </summary>
         public MainForm()
         {
             InitializeComponent();
             tabControl.Visible = false;
+        }
 
+        private void CopyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cSharpCodeControl.Copy();
         }
 
         /// <summary>
-        /// Settings object.
-        /// </summary>
-        CSharpSettings settings = null;
-
-        /// <summary>
-        /// Settings changed event handler.
+        ///     Settings changed event handler.
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event Argument.</param>
-        private void creatorSettings_ClassSettingChangedEventHandler(ClassGeneratorSettings sender, ClassGeneratorSettingsEventArgs e)
+        private void CreatorSettings_ClassSettingChangedEventHandler(ClassGeneratorSettings sender, ClassGeneratorSettingsEventArgs e)
         {
             try
             {
-                if (settings != null)
-                    settings = null;
+                _settings = null;
 
                 if (e.ClassName.Length == 0)
                     e.ClassName = dbTreeView.GetSelectedDbItem();
 
-                if (creator == null)
+                if (_creator == null)
                     return;
 
                 tabControl.Visible = true;
-                settings = CSharpSettings.GetCSharpSettings(e);
-                SQLHelper sql = new SQLHelper(AppStatic.DBConnectionString);
-                var code = creator.GenerateCSharpCode(
-                    settings
-                    , sql.GetClrProperties(
-                        dbTreeView.GetSelectedDbItemSchema()
-                        , dbTreeView.GetSelectedDbItem()
-                        , dbTreeView.GetDBObjectType()
-                        )
-                    );
+                _settings = CSharpSettings.GetCSharpSettings(e);
+                var sql = new SqlHelper(AppStatic.DbConnectionString);
+
+                var code = _creator.GenerateCSharpCode
+                (
+                    _settings,
+                    sql.GetClrProperties
+                    (
+                        dbTreeView.GetSelectedDbItemSchema(),
+                        dbTreeView.GetSelectedDbItem(),
+                        dbTreeView.GetDbObjectType()
+                    )
+                );
+
                 cSharpCodeControl.Text = code;
-                tabPage1.Text = $"{tabPage1.Text.Split(new string[] { " (" }, StringSplitOptions.RemoveEmptyEntries)[0]} ({dbTreeView.GetSelectedNode()})";
+
+                tabPage1.Text = $@"{tabPage1.Text.Split
+                (new[] { " (" }, StringSplitOptions.RemoveEmptyEntries)[0]} ({dbTreeView.GetSelectedNode()})";
+            }
+            catch (Exception ex)
+            {
+                ErrorViewerForm.ShowError(ex, this);
+            }
+        }
+
+        private void CSharpCodeControl_MouseClick(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                if (e.Button == MouseButtons.Right)
+                    textBoxContextMenu.Show(cSharpCodeControl, e.Location);
             }
             catch (Exception ex)
             {
@@ -76,7 +99,111 @@ namespace SqlToCSharp.Forms
         }
 
         /// <summary>
-        /// Load event handler of Main Form.
+        ///     Database change menu-item click event handler.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">Event Argument.</param>
+        private void DbConnectionStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var sqlConnForm = new SqlConnectionForm();
+
+                if (sqlConnForm.ShowDialog(this) == DialogResult.OK && sqlConnForm.ConnectionSuccess)
+                {
+                    AppStatic.DbConnectionString = sqlConnForm.ConnReq.SqlConn.ConnectionString;
+                    AppStatic.Database = sqlConnForm.ConnReq.SqlConn.Database;
+                    AppStatic.Server = sqlConnForm.ConnReq.SqlConn.DataSource;
+
+                    FormLoad();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorViewerForm.ShowError(ex, this);
+            }
+        }
+
+        private void DbTreeView_GenerateCSharpClass(object sender, EventArgs e)
+        {
+            PocoGenerateMenuItem_Click(sender, e);
+        }
+
+        private void DbTreeView_GenerateTypedDatatable(object sender, EventArgs e)
+        {
+            GenerateSimpleTypedDatatableToolStripMenuItem_Click(sender, e);
+        }
+
+        private void DbTreeView_SelectedNodeChanged(object sender, TreeViewEventArgs e)
+        {
+            classGeneratorSetting.ResetSettingsToDefault();
+        }
+
+        /// <summary>
+        ///     Configures the form on load.
+        /// </summary>
+        private void FormLoad()
+        {
+            LoadData();
+            dbTreeView.LoadTreeView(_dbObjects, AppStatic.Server, AppStatic.Database);
+            _creator = null;
+            tabControl.Visible = false;
+        }
+
+        /// <summary>
+        ///     Generate Simple Typed Datatable menu-item click evennt handler.
+        /// </summary>
+        /// <param name="sender">Sender.</param>
+        /// <param name="e">Event Argument.</param>
+        private void GenerateSimpleTypedDatatableToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                tabPage1.Text = @"Simple Typed Datatable";
+
+                _creator = null;
+
+                _creator = new TypedDatatableCreator();
+                classGeneratorSetting.ApplySettings();
+            }
+            catch (Exception ex)
+            {
+                ErrorViewerForm.ShowError(ex, this);
+            }
+        }
+
+        /// <summary>
+        ///     Loads Database object types and Database object names to Dictionary object.
+        /// </summary>
+        private void LoadData()
+        {
+            if (_dbObjects != null)
+            {
+                _dbObjects.Clear();
+                _dbObjects = null;
+            }
+
+            _dbObjects = new Dictionary<string, List<string[]>>();
+            var sql = new SqlHelper(AppStatic.DbConnectionString);
+
+            List<string[]> listDbItems = sql.GetTables();
+            _dbObjects.Add(Constants.TABLES, listDbItems);
+
+            listDbItems = sql.GetViews();
+            _dbObjects.Add(Constants.VIEWS, listDbItems);
+
+            listDbItems = sql.GetProcedures();
+            _dbObjects.Add(Constants.STORED_PROCEDURES, listDbItems);
+
+            listDbItems = sql.GetTableValuedFunctions();
+            _dbObjects.Add(Constants.TABLE_VALUED_FUNCTIONS, listDbItems);
+
+            listDbItems = sql.GetTableTypes();
+            _dbObjects.Add(Constants.USER_DEFINED_TABLE_TYPES, listDbItems);
+        }
+
+        /// <summary>
+        ///     Load event handler of Main Form.
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event Argument.</param>
@@ -84,19 +211,22 @@ namespace SqlToCSharp.Forms
         {
             try
             {
-                if (AppStatic.DBConnectionString.Length == 0)
+                if (AppStatic.DbConnectionString.Length == 0)
                 {
-                    var sqlConnForm = new SQLConnectionForm();
+                    var sqlConnForm = new SqlConnectionForm();
+
                     if (sqlConnForm.ShowDialog(this) == DialogResult.OK && sqlConnForm.ConnectionSuccess)
                     {
-                        AppStatic.DBConnectionString = sqlConnForm.ConnReq.SqlConn.ConnectionString;
+                        AppStatic.DbConnectionString = sqlConnForm.ConnReq.SqlConn.ConnectionString;
                         AppStatic.Database = sqlConnForm.ConnReq.SqlConn.Database;
                         AppStatic.Server = sqlConnForm.ConnReq.SqlConn.DataSource;
 
                         FormLoad();
                     }
                     else
-                        this.Close();
+                    {
+                        Close();
+                    }
                 }
             }
             catch (Exception ex)
@@ -106,79 +236,50 @@ namespace SqlToCSharp.Forms
         }
 
         /// <summary>
-        /// Loads Database object types and Database object names to Dictionary object.
-        /// </summary>
-        private void LoadData()
-        {
-            if (dbObjects != null)
-            {
-                dbObjects.Clear();
-                dbObjects = null;
-            }
-            dbObjects = new Dictionary<string, List<string[]>>();
-            SQLHelper sql = new SQLHelper(AppStatic.DBConnectionString);
-            List<string> listDB = new List<string>() { AppStatic.Database };
-
-            var listDbItems = sql.GetTables();
-            dbObjects.Add(Constants.Tables, listDbItems);
-
-            listDbItems = sql.GetViews();
-            dbObjects.Add(Constants.Views, listDbItems);
-
-            listDbItems = sql.GetProcedures();
-            dbObjects.Add(Constants.StoredProcedures, listDbItems);
-
-            listDbItems = sql.GetTableValuedFunctions();
-            dbObjects.Add(Constants.TableValuedFunctions, listDbItems);
-
-            listDbItems = sql.GetTableTypes();
-            dbObjects.Add(Constants.UserDefinedTableTypes, listDbItems);
-
-        }
-
-        /// <summary>
-        /// Configures the form on load.
-        /// </summary>
-        private void FormLoad()
-        {
-            LoadData();
-            this.dbTreeView.LoadTreeView(this.dbObjects, AppStatic.Server, AppStatic.Database);
-            creator = null;
-            tabControl.Visible = false;
-        }
-
-        /// <summary>
-        /// Database change menu-item click event handler.
+        ///     Generate C# Class menu-item click event handler.
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event Argument.</param>
-        private void dbConnectionStripMenuItem_Click(object sender, EventArgs e)
+        private void PocoGenerateMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
-                var sqlConnForm = new SQLConnectionForm();
-                if (sqlConnForm.ShowDialog(this) == DialogResult.OK && sqlConnForm.ConnectionSuccess)
-                {
-                    AppStatic.DBConnectionString = sqlConnForm.ConnReq.SqlConn.ConnectionString;
-                    AppStatic.Database = sqlConnForm.ConnReq.SqlConn.Database;
-                    AppStatic.Server = sqlConnForm.ConnReq.SqlConn.DataSource;
+                tabPage1.Text = @"C# Class";
 
-                    FormLoad();
+                _creator = null;
 
-                }
+                _creator = new CSharpClassCreator();
+                classGeneratorSetting.ApplySettings();
             }
             catch (Exception ex)
             {
                 ErrorViewerForm.ShowError(ex, this);
+
+                throw;
             }
         }
 
         /// <summary>
-        /// Save to file menu-item click event handler.
+        ///     Saves code to .cs file.
+        /// </summary>
+        private void SaveCode()
+        {
+            var diagSave = new SaveFileDialog
+                {
+                    FileName = _settings.ClassName + ".cs",
+                    Filter = @"C# files|*.cs"
+                };
+
+            if (diagSave.ShowDialog(this) == DialogResult.OK)
+                File.WriteAllText(diagSave.FileName, cSharpCodeControl.Text);
+        }
+
+        /// <summary>
+        ///     Save to file menu-item click event handler.
         /// </summary>
         /// <param name="sender">Sender.</param>
         /// <param name="e">Event Argument.</param>
-        private void saveToFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveToFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -190,103 +291,9 @@ namespace SqlToCSharp.Forms
             }
         }
 
-        /// <summary>
-        /// Saves code to .cs file.
-        /// </summary>
-        private void SaveCode()
-        {
-            var diagSave = new SaveFileDialog();
-            diagSave.FileName = settings.ClassName + ".cs";
-            diagSave.Filter = "C# files|*.cs";
-            if (diagSave.ShowDialog(this) == DialogResult.OK)
-            {
-                System.IO.File.WriteAllText(diagSave.FileName, cSharpCodeControl.Text);
-            }
-        }
-
-        /// <summary>
-        /// Generate C# Class menu-item click event handler.
-        /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">Event Argument.</param>
-        private void pocoGenerateMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                tabPage1.Text = "C# Class";
-                if (creator != null)
-                    creator = null;
-
-                creator = new CSharpClassCreator();
-                classGeneratorSetting.ApplySettings();
-            }
-            catch (Exception ex)
-            {
-                ErrorViewerForm.ShowError(ex, this);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Generate Simple Typed Datatable menu-item click evennt handler.
-        /// </summary>
-        /// <param name="sender">Sender.</param>
-        /// <param name="e">Event Argument.</param>
-        private void generateSimpleTypedDatatableToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                tabPage1.Text = "Simple Typed Datatable";
-                if (creator != null)
-                    creator = null;
-
-                creator = new TypedDatatableCreator();
-                classGeneratorSetting.ApplySettings();
-            }
-            catch (Exception ex)
-            {
-                ErrorViewerForm.ShowError(ex, this);
-            }
-        }
-
-        private void dbTreeView_GenerateCSharpClass(object sender, EventArgs e)
-        {
-            pocoGenerateMenuItem_Click(sender, e);
-        }
-
-        private void dbTreeView_GenerateTypedDatatable(object sender, EventArgs e)
-        {
-            generateSimpleTypedDatatableToolStripMenuItem_Click(sender, e);
-        }
-
-        private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SelectAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
             cSharpCodeControl.SelectAll();
-        }
-
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            cSharpCodeControl.Copy();
-        }
-
-        private void cSharpCodeControl_MouseClick(object sender, MouseEventArgs e)
-        {
-            try
-            {
-                if (e.Button == MouseButtons.Right)
-                {
-                    textBoxContextMenu.Show(cSharpCodeControl, e.Location);
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorViewerForm.ShowError(ex, this);
-            }
-        }
-
-        private void dbTreeView_SelectedNodeChanged(object sender, TreeViewEventArgs e)
-        {
-            classGeneratorSetting.ResetSettingsToDefault();
         }
     }
 }

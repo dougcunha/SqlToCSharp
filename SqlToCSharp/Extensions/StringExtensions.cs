@@ -1,5 +1,6 @@
 ﻿namespace SqlToCSharp.Extensions
 {
+    using System;
     using System.Linq;
 
     public static class StringExtensions
@@ -21,5 +22,13 @@
         /// <returns>True, if string value starts with any element present in specified string array.</returns>
         public static bool StartsWithAnItemInArray(this string value, string[] items)
             => items.Any(value.StartsWith);
+
+        public static string FirstCharToUpper(this string @this)
+            => char.ToUpper(@this[0]) + @this.Substring(1);
+
+        public static string ToPascalCase(this string @this)
+            => @this.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => char.ToUpperInvariant(s[0]) + s.Substring(1, s.Length - 1))
+                .Aggregate(string.Empty, func: (s1, s2) => s1 + s2);
     }
 }

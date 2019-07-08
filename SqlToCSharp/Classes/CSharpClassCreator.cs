@@ -151,23 +151,23 @@
             typeName = typeName.TrimEnd('?');
 
             var dict = new Dictionary<string, string>
-                {
-                    ["Int32"] = "int",
-                    ["String"] = "string",
-                    ["Int16"] = "short",
-                    ["Boolean"] = "bool",
-                    ["Int64"] = "long",
-                    ["Decimal"] = "float",
-                    ["Double"] = "double"
-                };
+            {
+                ["Int32"] = "int",
+                ["String"] = "string",
+                ["Int16"] = "short",
+                ["Boolean"] = "bool",
+                ["Int64"] = "long",
+                ["Decimal"] = "float",
+                ["Double"] = "double"
+            };
 
             var value = dict.TryGetValue(typeName, out var keyword)
-            ? keyword
-            : typeName;
+                ? keyword
+                : typeName;
 
             return nullable
-            ? $"{value}?"
-            : value;
+                ? $"{value}?"
+                : value;
         }
     }
 }

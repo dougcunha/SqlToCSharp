@@ -284,3 +284,7 @@ _scripts\.zip
 *.vres
 
 *.txt
+*.ide
+*.exe
+*.cache
+*.pdb

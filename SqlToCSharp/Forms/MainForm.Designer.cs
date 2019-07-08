@@ -117,7 +117,8 @@
             // generateSimpleTypedDatatableToolStripMenuItem
             // 
             this.generateSimpleTypedDatatableToolStripMenuItem.Name = "generateSimpleTypedDatatableToolStripMenuItem";
-            this.generateSimpleTypedDatatableToolStripMenuItem.Size = new System.Drawing.Size(194, 20);
+            this.generateSimpleTypedDatatableToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.generateSimpleTypedDatatableToolStripMenuItem.Size = new System.Drawing.Size(247, 24);
             this.generateSimpleTypedDatatableToolStripMenuItem.Text = "Generate Simple &Typed Datatable";
             this.generateSimpleTypedDatatableToolStripMenuItem.Click += new System.EventHandler(this.GenerateSimpleTypedDatatableToolStripMenuItem_Click);
             // 

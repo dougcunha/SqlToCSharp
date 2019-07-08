@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Windows.Forms;
+    using Extensions;
     using SqlToCSharp.Classes;
     using SqlToCSharp.Helpers;
     using SqlToCSharp.UserControls;
@@ -53,8 +54,8 @@
             {
                 _settings = null;
 
-                if (e.ClassName.Length == 0)
-                    e.ClassName = dbTreeView.GetSelectedDbItem();
+                if (string.IsNullOrWhiteSpace(e.ClassName))
+                    e.ClassName = dbTreeView.GetSelectedDbItem().ToPascalCase();
 
                 if (_creator == null)
                     return;

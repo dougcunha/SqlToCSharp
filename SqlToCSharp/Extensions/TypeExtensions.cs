@@ -20,8 +20,8 @@
                 $"{t.Name.Remove(t.Name.IndexOf('`'))}<{string.Join(",", t.GetGenericArguments().Select(at => at.GetDisplayName()))}>";
 
             return t.IsArray
-            ? $"{GetDisplayName(t.GetElementType())}[{new string(',', t.GetArrayRank() - 1)}]"
-            : t.Name;
+                ? $"{GetDisplayName(t.GetElementType())}[{new string(',', t.GetArrayRank() - 1)}]"
+                : t.Name;
         }
     }
 }

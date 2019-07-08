@@ -110,6 +110,7 @@
             // pocoGenerateMenuItem
             // 
             this.pocoGenerateMenuItem.Name = "pocoGenerateMenuItem";
+			this.pocoGenerateMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
             this.pocoGenerateMenuItem.Size = new System.Drawing.Size(114, 20);
             this.pocoGenerateMenuItem.Text = "Generate &C# Class";
             this.pocoGenerateMenuItem.Click += new System.EventHandler(this.PocoGenerateMenuItem_Click);

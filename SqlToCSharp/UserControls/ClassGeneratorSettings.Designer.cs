@@ -89,6 +89,8 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.ChkSnakeCaseNaming);
             this.groupBox4.Controls.Add(this.ChkNullValueJsonIgnore);
             this.groupBox4.Location = new System.Drawing.Point(9, 417);
